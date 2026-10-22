@@ -1,0 +1,9 @@
+app = "ticket-api"
+primary_region = "dfw"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+
+[[http_service.checks]]
+  path = "/health"

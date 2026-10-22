@@ -1,0 +1,13 @@
+{
+  "name": "ticket-api",
+  "version": "1.4.0",
+  "private": true,
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/server.js",
+    "test": "node --test"
+  },
+  "dependencies": { "fastify": "5.6.1" },
+  "devDependencies": { "typescript": "5.9.3" }
+}

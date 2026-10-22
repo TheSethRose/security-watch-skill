@@ -26,6 +26,7 @@ Contents: device · dependencies · containers · servers · hosting platforms �
 **Runtimes and apps**
 - Compare installed versions with the latest security release of the branch the user is on: `node -v`, `python3 -V`, `bun -v`, `deno -V`, `go version`, `docker version`.
 - Version managers can leave several runtimes installed. The default, and whatever the projects pin, are what matter.
+- A project usually sets its runtime version in several places: the base image in every Dockerfile stage, version files (`.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`, `.bun-version`), `packageManager`, and CI setup steps (`actions/setup-node`, `actions/setup-python`, `oven-sh/setup-bun`). Check them all, and fix them together. Fields like `engines.node` don't install anything, so leave them unless they would exclude the fixed version. A CI step with a floating version (`node-version: 24`) can run the runner's cached, older release: pin the patch or set `check-latest: true`.
 - Browsers and Electron apps mostly update themselves. Check the version only when an advisory names the app.
 
 ## Dependencies
@@ -56,6 +57,7 @@ A bundler that pins a vulnerable transitive dependency often needs an override o
 
 - Scan the base images and app images: `trivy image --scanners vuln --severity CRITICAL,HIGH --ignore-unfixed <image>`, or `grype <image>`, or `docker scout cves <image>`.
 - Check whether a newer tag of the same line exists. Many image CVEs are fixed simply by rebuilding on a fresh base.
+- How the image is pinned decides the fix. An exact tag moves to the fixed tag, keeping its variant (`-slim`, `-alpine`). A digest pin needs the new digest. A floating tag (`node:24`, `latest`) needs only a rebuild with `--pull --no-cache` and a redeploy.
 - CVEs that are still in the latest upstream image aren't the user's to fix. Record them as `waiting` on a newer image.
 - On servers, list what's actually running: `docker ps --format '{{.Image}} {{.Status}}'`. A rebuilt image doesn't help until the container is recreated.
 

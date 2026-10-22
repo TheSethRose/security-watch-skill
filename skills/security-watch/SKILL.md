@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting platforms and websites, then work with them to fix it. Learns their real stack from the conversation, memory, project files and a few questions instead of assuming any provider, checks current advisories, and keeps a ledger of findings and decisions so each run flags what is new or changed and still lists everything that affects them, including deferred and ignored items. Use whenever the user asks what they need to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, a check of whether a new advisory affects them, or a recurring/daily security watch, even if they don't say "security watch". Not for penetration testing or for systems the user doesn't own or run.
 metadata:
-  version: "1.2.1"
+  version: "1.3.0"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -90,9 +90,10 @@ The user decides what changes. Asking for a check is a read-only request.
 
 - **Get approval before changing a system.** That covers upgrades, lockfile or dependency changes, commits and pushes, deploys, restarts and reboots, and config changes. Describe the change, what it touches and how you'll verify it. Approval for one change doesn't cover the next.
 - **Make the smallest change that removes the risk.** Follow the project's own rules (AGENTS.md, CLAUDE.md, CONTRIBUTING), its package manager and lockfile, and its tests. Run the tests before and after the change: failures that were already there aren't regressions, but say they exist. Preserve uncommitted work.
+- **Change every place that sets the version,** and test what ships. A runtime or base image is often pinned in several files ([checks.md](references/checks.md) lists where). For a container deploy, build the image, confirm the version inside it, then start it with its production command and request a health route.
 - **Be careful with brand-new releases.** They are a supply-chain risk. Prefer a fixed version that has been out a few days unless the issue is actively exploited or critical, and say which you chose. Respect any release-age cooldown the user has configured.
-- **A fix isn't done until it's running.** A merged fix still has to be deployed, rebuilt or restarted. Verify on the running system: deployed commit or version, service health, and the check that found it no longer finding it. Then mark the item `fixed` with that evidence.
-- **When upstream has no fix,** set the item to `waiting` or `accepted`. Give it a concrete recheck: the upstream issue or PR link, the version to watch for, or a date. It stays listed under Deferred, and moves to Action needed when that trigger fires.
+- **A fix isn't done until it's running.** A merged fix still has to be deployed, rebuilt or restarted. Verify on the running system: deployed commit or version, service health, and the check that found it no longer finding it. Then mark the item `fixed` with that evidence. Before deploying, note what you'd roll back to (the previous commit, image or deployment). It is still vulnerable, so roll back only to buy time.
+- **When upstream has no fix,** set the item to `waiting` or `accepted`. Give it a concrete recheck: the upstream issue or PR link, the version to watch for, or a date. It stays listed under Deferred, and moves to Action needed when that trigger fires. A mitigation, such as a config switch or a proxy limit, lowers the risk but doesn't remove it: record it in the item's note and keep the item `waiting`.
 
 ## Recurring runs
 

@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: fix-updates-every-pin
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent moves ticket-api to Node 24.22.1 everywhere the version is set: both Dockerfile stages
+  (keeping -slim), .nvmrc and .node-version. The CI setup-node step's floating "24" gets
+  check-latest: true or a pinned 24.22.1. engines.node (">=24") is left alone. It doesn't commit,
+  push or deploy. Its reply lists the changed files and tells the user how to verify the deploy:
+  check node -v inside the built image or running machine, the /health route, and the previous
+  release to roll back to.
