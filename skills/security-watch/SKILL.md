@@ -54,14 +54,19 @@ Keep it short. The user should be able to act on it in a minute.
 <!-- One line per ledger item in waiting or fixing, or open with a future recheck date: what you're waiting for and its state today. Areas you couldn't check belong under Checked, not here. -->
 
 
-## Still open
-<!-- Counts per area, nothing listed individually: "shop-web: 3 high, unchanged; web-1: reboot pending since <date>". -->
+## To do
+<!-- Every `open` item the user hasn't acted on yet, one line each, grouped by root cause: "web-1: 4 security updates pending since <date>. Next step: apt upgrade, then reboot". Listed every run until it is fixed, accepted or ignored. -->
+
+## Decided
+<!-- Counts of accepted and ignored items per area. Nothing listed individually. -->
 
 ## Checked
 <!-- What ran, what failed, what was skipped and why: missing tool, needs a login, host unreachable. -->
 ```
 
-If nothing is new or changed, say so in one line, followed by Checked. Silence is the goal, not a failure.
+If nothing is new or changed, say so in one line. Still list To do, then Checked. Never say everything is fine while To do has items.
+
+The difference matters. A decided item (`waiting`, `accepted`, `ignored`) is noise if it repeats, so it stays quiet until its trigger fires. An `open` item is something the user still has to act on. Hiding it makes a report read as "all clear" when it isn't. Keep each one to a line, and offer to go through them so each gets a decision.
 
 ## Fixing
 

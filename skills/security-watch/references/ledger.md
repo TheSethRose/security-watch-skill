@@ -72,7 +72,7 @@ Compare each result with the ledger:
   - it came back after being `fixed` (a regression).
   Report it and update the entry.
 - **Due:** a `waiting` or `accepted` item whose recheck condition is now met: the date has passed, the upstream fix shipped, or the watched version exists. Also an `open` item last reported more than `remind_after_days` ago, which gets one reminder line. Report it and reset `last_reported`.
-- **Unchanged:** everything else. Update `last_seen` and count it under "Still open". Don't list it.
+- **Unchanged:** everything else. Update `last_seen`. List an `open` one under "To do" (one line, grouped by root cause), because it still needs the user. Count `accepted` and `ignored` ones under "Decided". Leave `waiting` and `fixing` ones under "Waiting on".
 - **Resolved:** a check that ran successfully no longer finds it. Verify it, then mark it `fixed` with the date and evidence. Never resolve an item because its check failed or was skipped.
 
 Fill in a recheck so the next run can test it without judgment. Good: "Homebrew `node` formula ≥ 26.12.1", "after 2026-11-01", "https://github.com/owner/repo/pull/123 released". Bad: "check later".
@@ -92,7 +92,7 @@ When setting up for someone who has already been patching, add what they've told
 On the first run everything is New. Don't dump hundreds of lines on the user:
 
 1. Report the real action items: exploited, critical or internet-facing issues with a fix available.
-2. Summarize the rest as counts per area.
+2. Summarize the rest as counts per area under To do, for example "shop-web: 37 dependency findings, 2 critical".
 3. Mark everything reported or summarized as `open`, with `last_reported` set to today.
 4. Offer to go through the backlog with them once, setting each item to `accepted`, `ignored`, `waiting` or a fix.
 
