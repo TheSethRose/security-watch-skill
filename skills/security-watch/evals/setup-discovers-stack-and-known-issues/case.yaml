@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: setup-discovers-stack-and-known-issues
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent builds an inventory from the files and notes: shop-web on Vercel (Next.js 15.2.1), the api on Fly.io
+  with a python:3.12-slim image it must patch, the web-1 VPS and the Mac. It does not invent other providers and
+  does not treat work-bastion as the user's server. It records the user's past decisions (lodash ignored as
+  dev-only, staging skipped) in the ledger, reports the critical Next.js middleware bypass (fixed in 15.2.3)
+  as the main action item, and lists questions for the user instead of guessing.

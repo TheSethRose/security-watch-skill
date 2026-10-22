@@ -1,0 +1,6 @@
+Host web-1
+  HostName 203.0.113.10
+  User deploy
+Host work-bastion
+  HostName bastion.corp.example.net
+  User jdoe

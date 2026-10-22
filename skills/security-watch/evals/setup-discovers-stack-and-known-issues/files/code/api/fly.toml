@@ -1,0 +1,5 @@
+app = "acme-api"
+primary_region = "fra"
+
+[http_service]
+  internal_port = 8000
