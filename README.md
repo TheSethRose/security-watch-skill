@@ -9,6 +9,14 @@ It isn't a scanner. It teaches your agent how to:
 - **Remember what you've already discussed.** A local ledger records every finding and decision ("dev-only, ignore", "waiting on upstream", "fixed, awaiting deploy"). Later runs report only what's new or has changed: a fix became available, severity went up, it's now exploited, or a recheck date arrived. Everything else is a count.
 - **Fix things with you.** The smallest safe change, done only with your approval and following your repo's rules, then verified on the running system rather than just in the repo.
 
+## Quick start
+
+Paste this into your agent:
+
+```text
+Read https://github.com/TheSethRose/security-watch-skill and help me set up a recurring security watch: install the skill, learn what I run from our chats, my memory files and my projects, ask me only what you can't find, then schedule a read-only daily check that tells me only about new things I need to patch.
+```
+
 ## Install
 
 With the [skills CLI](https://skills.sh):
