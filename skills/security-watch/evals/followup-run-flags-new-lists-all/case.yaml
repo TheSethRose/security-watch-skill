@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: followup-run-flags-new-lists-all
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The report's Action needed lists only what is new or changed: the Node.js 22 security release (installed
+  22.11.0, fixed in 22.23.4), the new ws finding (GHSA-3h5v-q93c-6h6q, fixed in 8.17.1), and braces now having a fix.
+  The rest of the report still lists everything that affects the user: the open Next.js item under To do (nothing
+  about it changed and its recheck date has not arrived), the waiting glibc image item under Deferred with what it
+  waits for, and the ignored esbuild item under Ignored with its reason. The perl item was hidden earlier and the
+  user asks to stop showing the zlib item, so neither is listed, but the report counts 2 hidden items and the ledger
+  marks zlib hidden. The web-1 reboot item is marked fixed, the irrelevant feed items (Plex KEV, PGDay,
+  already-seen story) are not reported, and the ledger records the changes and the reviewed advisories.

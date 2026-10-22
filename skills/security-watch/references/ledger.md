@@ -1,6 +1,6 @@
 # Ledger and triage
 
-The ledger is what turns "every CVE, every day" into "what changed since we last talked". Keep it accurate and the reports stay short.
+The ledger is what turns "every CVE, every day" into "what changed since we last talked", while still keeping every open, deferred and ignored finding in front of the user. Keep it accurate and the reports stay useful.
 
 ## Format
 
@@ -26,6 +26,13 @@ The ledger is what turns "every CVE, every day" into "what changed since we last
       "note": "2026-10-20: user wants it after Friday's launch",
       "recheck": "",
       "source": "https://github.com/advisories/GHSA-f82v-jwr5-mffw"
+    },
+    "dep:shop-web:lodash:GHSA-xxxx-xxxx-xxxx": {
+      "title": "lodash prototype pollution",
+      "status": "ignored",
+      "note": "2026-10-12: dev-only, only used by the test runner",
+      "hidden": true,
+      "hidden_on": "2026-10-19"
     }
   },
   "reviewed": {
@@ -38,6 +45,7 @@ The ledger is what turns "every CVE, every day" into "what changed since we last
 - `findings` holds things that need, or needed, action on the user's systems.
 - `reviewed` holds every advisory, feed item or news story you looked at, whether it was relevant or not, keyed by URL or CVE. It exists so you never read the same item twice.
 - When an advisory turns out to affect the user, it gets a finding as well.
+- `hidden` (optional, `ignored` items only) means the user asked to stop seeing that item in reports. `hidden_on` records when.
 
 ## IDs
 
@@ -52,12 +60,14 @@ An ID must stay the same from run to run for the same problem. Build it as `<are
 
 | Status | Meaning | Reported when |
 |---|---|---|
-| `open` | Needs action and has been reported. | Only if it changes, or once as a reminder after `remind_after_days`. |
-| `fixing` | Approved and in progress, for example "fix merged, awaiting deploy". The note says what's left. | Under "Waiting on" until verified. |
-| `waiting` | Blocked on upstream or on a date. `recheck` says exactly what to check. | Only when the recheck trigger fires. |
-| `accepted` | The user chose to live with it. Record why, plus an optional `recheck`. | Only when its recheck fires, or if it gets materially worse. |
-| `ignored` | False positive or doesn't apply. Record why. | Never. |
-| `fixed` | Verified gone. Keep it for 90 days so a regression is noticed. | If it reappears, as a regression. |
+| `open` | Needs action and has been reported. | Every run under To do. Under Action needed when it changes, or once as a reminder after `remind_after_days`. |
+| `fixing` | Approved and in progress, for example "fix merged, awaiting deploy". The note says what's left. | Every run under Deferred, saying what's left, until verified. |
+| `waiting` | Blocked on upstream or on a date. `recheck` says exactly what to check. | Every run under Deferred, with its recheck. Under Action needed when the trigger fires. |
+| `accepted` | The user chose to live with it. Record why, plus an optional `recheck`. | Every run under Deferred, with the reason. Under Action needed when its recheck fires or it gets materially worse. |
+| `ignored` | False positive or doesn't apply. Record why. | Every run under Ignored, with the reason, unless `hidden`. Hidden ones are counted, not listed. |
+| `fixed` | Verified gone. Keep it for 90 days so a regression is noticed. | Once under "Fixed since last run". If it reappears, as a regression under Action needed. |
+
+Every finding that isn't `fixed` appears in every report, in exactly one section. That way a deferred item can't be forgotten just because nothing about it changed.
 
 ## Classifying a run
 
@@ -72,7 +82,7 @@ Compare each result with the ledger:
   - it came back after being `fixed` (a regression).
   Report it and update the entry.
 - **Due:** a `waiting` or `accepted` item whose recheck condition is now met: the date has passed, the upstream fix shipped, or the watched version exists. Also an `open` item last reported more than `remind_after_days` ago, which gets one reminder line. Report it and reset `last_reported`.
-- **Unchanged:** everything else. Update `last_seen`. List an `open` one under "To do" (one line, grouped by root cause), because it still needs the user. Count `accepted` and `ignored` ones under "Decided". Leave `waiting` and `fixing` ones under "Waiting on".
+- **Unchanged:** everything else. Update `last_seen` and list it in its section: `open` under To do, `waiting`, `fixing` and `accepted` under Deferred, and `ignored` under Ignored (unless `hidden`). Group lines by root cause and name every component in the group.
 - **Resolved:** a check that ran successfully no longer finds it. Verify it, then mark it `fixed` with the date and evidence. Never resolve an item because its check failed or was skipped.
 
 Fill in a recheck so the next run can test it without judgment. Good: "Homebrew `node` formula ≥ 26.12.1", "after 2026-11-01", "https://github.com/owner/repo/pull/123 released". Bad: "check later".
@@ -84,6 +94,7 @@ When the user says something about an issue, record it straight away with the da
 - "That's dev-only": `ignored` or `accepted`, saying why.
 - "I'll do it after launch": stays `open`, with a note, and `recheck` set to the date.
 - "Fixed it": `fixing` until you verify it on the running system, then `fixed`.
+- "Stop showing me that one" about an `ignored` item: set `hidden: true` and `hidden_on` to today. "Show me the hidden ones" lists them; "show that one again" removes the flag. If it is about a deferred or open item, ask whether to ignore it first, because only ignored items can be hidden.
 
 When setting up for someone who has already been patching, add what they've told you before the first run, so the baseline doesn't re-announce things they handled.
 
@@ -92,9 +103,9 @@ When setting up for someone who has already been patching, add what they've told
 On the first run everything is New. Don't dump hundreds of lines on the user:
 
 1. Report the real action items: exploited, critical or internet-facing issues with a fix available.
-2. Summarize the rest as counts per area under To do, for example "shop-web: 37 dependency findings, 2 critical".
+2. List the rest under To do, grouped by root cause and naming the components, for example "shop-web: 37 dependency findings (2 critical): next, lodash 3, braces 2, …".
 3. Mark everything reported or summarized as `open`, with `last_reported` set to today.
-4. Offer to go through the backlog with them once, setting each item to `accepted`, `ignored`, `waiting` or a fix.
+4. Offer to go through the backlog with them once, setting each item to `accepted`, `ignored`, `waiting` or a fix. From then on it shows under Deferred or Ignored instead of To do.
 
 ## Upkeep
 

@@ -4,12 +4,15 @@
 - GHSA-f82v-jwr5-mffw, next 15.2.1, CVSS 9.1, fixed in 15.2.3
 - GHSA-grv7-fg5c-xmjg, braces 3.0.2, CVSS 7.5, fixed in 3.0.3   <- osv now lists a fix
 - GHSA-3h5v-q93c-6h6q, ws 8.13.0, CVSS 7.5, fixed in 8.17.1
+- GHSA-67mh-4wv8-2f99, esbuild 0.21.5, CVSS 5.3, fixed in 0.25.0
 
 ## osv-scanner, api (requirements.txt)
 - no high/critical findings
 
 ## trivy, python:3.12-slim (pulled 2026-10-22)
 - CVE-2026-0001 glibc 2.36-9, CRITICAL, no fixed version
+- CVE-2026-0002 perl 5.36.0-7, LOW, no fixed version
+- CVE-2026-0003 zlib 1.2.13, LOW, no fixed version
 
 ## web-1 (ssh)
 - Ubuntu 24.04.3, kernel 6.8.0-90 running, newest installed 6.8.0-90
