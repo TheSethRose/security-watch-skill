@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting platforms and websites, then work with them to fix it. Learns their real stack from the conversation, memory, project files and a few questions instead of assuming any provider, checks current advisories, and keeps a ledger of findings and decisions so each run flags what is new or changed and still lists everything that affects them, including deferred and ignored items. Use whenever the user asks what they need to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, a check of whether a new advisory affects them, or a recurring/daily security watch, even if they don't say "security watch". Not for penetration testing or for systems the user doesn't own or run.
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -21,7 +21,7 @@ Use the folder the user already has for this. If there isn't one, create `~/.sec
 |---|---|
 | `inventory.md` | What they run and where each fact came from. Template in [discovery.md](references/discovery.md). |
 | `ledger.json` | Every finding and every advisory reviewed, with its status and what was decided. Format in [ledger.md](references/ledger.md). |
-| `reports/YYYY-MM-DD.md` | One report per run. |
+| `reports/YYYY-MM-DD.md` | One report per run. A second run on the same day gets `YYYY-MM-DD-HHMM.md`, so earlier reports are kept. |
 
 Never write secrets into these files: no tokens, passwords, connection strings or private keys. Hostnames, versions and URLs are fine. If the host has a memory feature, save the folder's path there so later sessions find it.
 
@@ -41,7 +41,7 @@ Never write secrets into these files: no tokens, passwords, connection strings o
    - the component is really used (production code, not only a dev tool);
    - note whether it is reachable from the internet.
    Cite the advisory for every version or severity claim. Don't guess.
-5. **Report** in the format below and save it to `reports/`.
+5. **Report** in the format below and save it to `reports/`. Read the current local date and time first (`date`); don't infer them.
 6. **Fix with the user** (see Fixing). Update the ledger as each item moves.
 7. **Save.** Write the ledger, including `last_run` and the advisories you reviewed.
 
@@ -50,7 +50,7 @@ Never write secrets into these files: no tokens, passwords, connection strings o
 Every run lists **every finding that still affects the user**, so nothing slips out of sight. Each one appears in exactly one section. Only `fixed` items drop out. What changes from run to run is what goes under Action needed, which is also the only section that triggers a notification.
 
 ```markdown
-# Security watch, <date>
+# Security watch, <YYYY-MM-DD HH:MM timezone>
 
 <!-- Only when a newer skill version exists and wasn't installed (a scheduled run, or the user said no): -->
 > Skill update available: <installed> → <latest>. <one line on what changed>. Update with `<command>`, or say "update the security-watch skill".
@@ -77,6 +77,8 @@ Every run lists **every finding that still affects the user**, so nothing slips 
 ```
 
 Keep each line short, and group findings that share a root cause, but name every affected component in the group ("shop-web: 6 findings: next, braces 3, postcss 2"). A long report is fine; a report that leaves something out is not.
+
+**Dates, not times of day.** Use the date and time you read from the clock. Never write "tonight", "this morning" or "this evening": you don't know the user's day, and a scheduled report may be read hours later. Refer to the previous run by its date and time ("since the 2026-10-22 09:15 run").
 
 If nothing is new or changed, say so in one line at the top, then list the other sections as usual. Never say everything is fine while To do has items.
 

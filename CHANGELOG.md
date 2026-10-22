@@ -2,6 +2,10 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.2.1 (2026-10-22)
+
+- Reports use the date and time read from the clock, never "tonight" or "this morning". A second run on the same day saves `YYYY-MM-DD-HHMM.md` instead of overwriting the day's report.
+
 ## 1.2.0 (2026-10-22)
 
 - Every report lists every finding that still affects you, not only what's new. New, changed and due items stay under Action needed, which is still the only section that notifies you.
