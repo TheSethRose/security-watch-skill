@@ -2,6 +2,11 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.6.0 (2026-10-23)
+
+- New server exposure checks: what listens, what the provider firewall allows, what public scanners see, whether sites behind a CDN can be reached straight at the origin, and whether hostnames bypass the CDN.
+- Recommendations to close each gap, smallest first: web ports only from the CDN, SSH and admin ports only over a private network, no public database ports, and optionally an outbound tunnel.
+
 ## 1.5.0 (2026-10-23)
 
 - Device checks look past the system copy: tools that bundle their own runtime or library, and long-running processes that still have the old one loaded after an upgrade.

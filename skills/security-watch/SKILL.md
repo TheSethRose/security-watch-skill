@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting platforms and websites, then work with them to fix it. Learns their real stack from the conversation, memory, project files and a few questions instead of assuming any provider, checks current advisories, and keeps a ledger of findings and decisions so each run flags what is new or changed and still lists everything that affects them, including deferred and ignored items. Use whenever the user asks what they need to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, a check of whether a new advisory affects them, or a recurring/daily security watch, even if they don't say "security watch". Not for penetration testing or for systems the user doesn't own or run.
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -36,7 +36,7 @@ Never write secrets into these files: no tokens, passwords, connection strings o
    - No inventory yet: run setup first ([discovery.md](references/discovery.md)).
    - Inventory older than about 30 days, or the conversation mentions something it doesn't list: update it.
 2. **Record what has already been discussed.** Before checking anything, scan the conversation and any memory for decisions about specific issues. Examples: "we know about that one, no fix yet", "patched it yesterday", "staging doesn't matter", "waiting on the vendor", "stop showing me that one". Add or update ledger entries for each one, with the date and the decision. This is what keeps old items from being reported as new.
-3. **Find.** Work through each inventory area with [checks.md](references/checks.md), and check advisories published since the last run with [sources.md](references/sources.md). If they use AI agents, also scan agent transcripts for personal details sent to other sites ([agent-privacy.md](references/agent-privacy.md)). Finding is read-only.
+3. **Find.** Work through each inventory area with [checks.md](references/checks.md), including what each server exposes to the internet, and check advisories published since the last run with [sources.md](references/sources.md). If they use AI agents, also scan agent transcripts for personal details sent to other sites ([agent-privacy.md](references/agent-privacy.md)). Finding is read-only.
 4. **Triage against the ledger** ([ledger.md](references/ledger.md)). Sort every result into New, Changed, Due, Unchanged or Resolved. Before calling anything New or Changed, confirm it applies:
    - the installed version is in the affected range;
    - the component is really used (production code, not only a dev tool);

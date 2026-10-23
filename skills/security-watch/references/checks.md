@@ -94,6 +94,24 @@ Also note:
 - the Docker engine version;
 - versions of the database and proxy the server runs (`postgres --version`, `nginx -v`, `caddy version`, `traefik version`), to match against advisories.
 
+## Server exposure
+
+Patching closes known holes; exposure decides who can reach the next one. For every server the user runs, check what the internet can reach. All of this is read-only:
+
+- **What listens:** `sudo ss -Hltnu` on the host, plus ports that containers publish on all interfaces (`docker ps --format '{{.Names}} {{.Ports}}'`). Docker bypasses host firewalls such as ufw, so a provider or network firewall is often the only real filter. Read its rules with the provider's CLI or console.
+- **What the internet sees:** a passive scan index such as `curl -s https://internetdb.shodan.io/<ip>` lists ports that public scanners found. It can lag by days. A test from the user's own network can mislead when their IP is allowlisted, so say where it ran.
+- **Origin bypass:** when sites sit behind a CDN or WAF, request one straight from the origin: `curl -s -o /dev/null -w '%{http_code}' --resolve <site>:443:<origin-ip> https://<site>/`. A normal response means attackers can skip the WAF.
+- **DNS:** each public hostname behind a CDN should resolve to the CDN's addresses. A record that points straight at the origin, including auto-generated hostnames a panel created, leaks the origin IP and breaks once the origin is locked down.
+
+When there's a gap, recommend the smallest step that closes it, in this order:
+
+1. **Web ports only from the CDN.** Allow 80/443 only from the CDN's published IP ranges, at the firewall that actually filters. Keep the ranges in the state folder and recheck them each run. First list every hostname that reaches the origin without the CDN, and move or retire it, or it stops working.
+2. **No public SSH or admin ports.** Reach servers over a private network (Tailscale, WireGuard, the provider's private network). Anything that connects to the servers itself, such as a deploy panel, CI or backups, needs moving to the private addresses first. Keep an out-of-band way in, such as the provider's web console.
+3. **No public database ports.** Connect apps over the private network.
+4. **Optionally, an outbound tunnel** (Cloudflare Tunnel or similar), so the origin accepts no inbound web traffic at all.
+
+These are firewall and config changes, so they need the user's approval. Afterwards, rerun the check that found the gap. Record each gap as its own ledger item. If the user has no CDN or private network, report the open ports and leave the choice to them.
+
 ## Hosting platforms
 
 What the user has to patch depends on who runs what.
