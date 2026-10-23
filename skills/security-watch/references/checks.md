@@ -2,7 +2,7 @@
 
 Run the checks that match the inventory, and skip areas the user doesn't have. Every command here is read-only, apart from refreshing package metadata. When a tool isn't installed, use the fallback or note the gap under "Checked". Don't install tools without asking.
 
-Contents: device · dependencies · containers · servers · hosting platforms · sites · deployed vs fixed.
+Contents: device · dependencies · containers · servers · hosting platforms · sites · AI agents · deployed vs fixed.
 
 ## Device
 
@@ -95,6 +95,11 @@ What the user has to patch depends on who runs what.
 - Status: `curl -sS -o /dev/null -w '%{http_code} %{ssl_verify_result}\n' https://<site>`. Compare with the expected status in the inventory. Redirects and 404s at an API root can be normal.
 - TLS: `echo | openssl s_client -connect <host>:443 -servername <host> 2>/dev/null | openssl x509 -noout -issuer -enddate`. Flag expiry within 14 days, and issuers that browsers have distrusted.
 - Headers: `curl -sI` shows `server`, `x-powered-by` and framework headers. These are worth matching against advisories, and worth suggesting the user hide.
+
+## AI agents
+
+- Agents run code with the user's permissions, so their CLIs, editor extensions and MCP servers are checked like any other app: versions against advisories.
+- Agents can also send the user's own details to other sites, for example a contact email in a User-Agent or their name in a search. Scan their transcripts with `scripts/agent_privacy.py scan`, and remediate with the user. Both are in [agent-privacy.md](agent-privacy.md).
 
 ## Deployed vs fixed
 

@@ -21,7 +21,7 @@ Only look where the user expects you to.
 - Docker or another container runtime.
 - Browsers, and desktop apps that embed browsers (Electron apps such as chat, notes and password-manager clients).
 - VPN and remote-access tools.
-- AI tooling: agent CLIs, editor extensions and MCP servers. These run code with the user's permissions, so they're in scope.
+- AI tooling: agent CLIs, editor extensions and MCP servers. These run code with the user's permissions, so they're in scope. If there are any, set up the agent privacy check too ([agent-privacy.md](agent-privacy.md)).
 
 **Projects.**
 - Ask where their code lives, or look in the usual places (`~/code`, `~/Developer`, `~/projects`, `~/src`).
@@ -65,7 +65,8 @@ Show a draft inventory grouped by area and ask the user to correct it in one rep
 - which projects and sites are in production;
 - where each one is hosted;
 - which servers are theirs;
-- anything they already know is vulnerable, or have decided to accept.
+- anything they already know is vulnerable, or have decided to accept;
+- if they use AI agents: the personal details to watch for in agent requests, and which domains are theirs ([agent-privacy.md](agent-privacy.md)).
 
 Their answers about known issues go straight into the ledger ([ledger.md](ledger.md)).
 

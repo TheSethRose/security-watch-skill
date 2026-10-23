@@ -2,6 +2,11 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.4.0 (2026-10-23)
+
+- New agent privacy check, for anyone who uses AI agents. `scripts/agent_privacy.py scan` reads Claude Code and Codex transcripts for requests that sent your email, name, phone or address to a site that isn't yours: in a header such as the User-Agent, in the URL, in a body or in a search query. You give it the details to look for. They're kept in `privacy.json` in the state folder, readable only by you.
+- The same script works as a Claude Code `PreToolUse` hook. It asks you before a request sends those details to a site outside your own domains, and lets everything else through. Set `"mode": "deny"` to block those requests instead. The skill walks you through what leaked, an instruction for your agents, installing and testing the hook, and closing the findings.
+
 ## 1.3.0 (2026-10-22)
 
 - Fixes cover every place a runtime version is set: Dockerfile stages, version files, `packageManager` and CI setup steps. A floating CI version gets `check-latest: true` or a pinned patch.

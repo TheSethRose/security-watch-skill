@@ -2,11 +2,12 @@
 
 An agent skill that finds what **you** need to patch across your devices, code, servers, hosting and websites, then works with you to fix it.
 
-It isn't a scanner. It teaches your agent how to:
+It's not a scanner, though it bundles one small script for checking AI agents. It teaches your agent how to:
 
 - **Learn your actual stack.** It works from your conversations, memory files, project files and a few questions. It doesn't assume Vercel, Coolify, AWS or anything else.
 - **Find what's patchable** with the tools you already have: OS updates, dependency audits, image scans, SSH checks on your servers, platform settings and site TLS. It also reads advisory feeds that match what you run.
 - **Remember what you've already discussed.** A local ledger records every finding and decision ("dev-only, ignore", "waiting on upstream", "fixed, awaiting deploy"). Each run flags what's new or changed under Action needed: a fix became available, severity went up, it's now exploited, or a recheck date arrived. It still lists everything else that affects you, so nothing gets forgotten: open items under To do, items waiting on a date, a fix or your reason under Deferred, and ignored items with their reason. Ask it to stop showing an ignored item and it's hidden from then on, but still counted.
+- **Catch your AI agents leaking your details.** Agents sometimes put your email in a User-Agent because a site asked for contact details, or your name in a web search. A bundled script finds this in past agent transcripts. An optional Claude Code hook asks you before any request sends your details to a site that isn't yours. You give it the details to look for, and they stay in a local file.
 - **Fix things with you.** The smallest safe change, done only with your approval and following your repo's rules, then verified on the running system rather than just in the repo.
 
 ## Quick start
@@ -76,7 +77,10 @@ skills/security-watch/
 │   ├── checks.md            how to find patchable things, per area
 │   ├── sources.md           advisory feeds and lookup APIs
 │   ├── ledger.md            findings ledger and triage rules
+│   ├── agent-privacy.md     AI agents sending your details to other sites
 │   └── updates.md           checking for and installing skill updates
+├── scripts/
+│   └── agent_privacy.py     transcript scan and PreToolUse guard (Python stdlib)
 └── evals/                   test cases (claude plugin eval)
 ```
 
