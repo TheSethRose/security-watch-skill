@@ -87,6 +87,8 @@ Compare each result with the ledger:
 
 Fill in a recheck so the next run can test it without judgment. Good: "Homebrew `node` formula ≥ 26.12.1", "after 2026-11-01", "https://github.com/owner/repo/pull/123 released". Bad: "check later".
 
+A mitigation that changes files an OS or package update owns can be undone by that update. Examples are a trust store, a system config file, or a patched vendored file. Give its item the recheck "after every OS update" (or "after `<package>` upgrades"), and re-run the check that proves the mitigation still holds.
+
 ## Recording conversation decisions
 
 When the user says something about an issue, record it straight away with the date and their words in short:

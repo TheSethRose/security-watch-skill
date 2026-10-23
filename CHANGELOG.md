@@ -2,6 +2,15 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.5.0 (2026-10-23)
+
+- Device checks look past the system copy: tools that bundle their own runtime or library, and long-running processes that still have the old one loaded after an upgrade.
+- When an advisory publishes a test endpoint, each affected client is tested against it, because clients keep separate trust stores and libraries.
+- Reachability uses what's listening on all interfaces, and, for client-side bugs, what fetches untrusted content.
+- A breach at a platform where you keep secrets is a finding. The fix is rotating those secrets.
+- Mitigations that an OS or package update can undo get rechecked after each update.
+- Fixing rules: back up and note the undo before a config change, say what a service does before restarting it, never pipe a remote script into a shell, ask before every `sudo`, and hand dialogs and passwords to you. Reports keep out process arguments, environment variables and file contents, and say what a check couldn't see.
+
 ## 1.4.0 (2026-10-23)
 
 - New agent privacy check, for anyone who uses AI agents. `scripts/agent_privacy.py scan` reads Claude Code and Codex transcripts for requests that sent your email, name, phone or address to a site that isn't yours: in a header such as the User-Agent, in the URL, in a body or in a search query. You give it the details to look for. They're kept in `privacy.json` in the state folder, readable only by you.

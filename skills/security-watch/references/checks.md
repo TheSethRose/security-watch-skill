@@ -29,6 +29,30 @@ Contents: device · dependencies · containers · servers · hosting platforms �
 - A project usually sets its runtime version in several places: the base image in every Dockerfile stage, version files (`.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`, `.bun-version`), `packageManager`, and CI setup steps (`actions/setup-node`, `actions/setup-python`, `oven-sh/setup-bun`). Check them all, and fix them together. Fields like `engines.node` don't install anything, so leave them unless they would exclude the fixed version. A CI step with a floating version (`node-version: 24`) can run the runner's cached, older release: pin the patch or set `check-latest: true`.
 - Browsers and Electron apps mostly update themselves. Check the version only when an advisory names the app.
 
+**Bundled copies**
+- Many tools ship their own copy of a runtime or library, so upgrading the system copy doesn't fix them. Examples: single-file binaries built with Bun, Deno or Node, Electron apps, statically linked Go and Rust binaries, and apps with a vendored Python or CA list. Only the tool's own release can fix those copies.
+- When an advisory names a library or runtime, ask which installed tools embed it, and check each one:
+  - the vendor's release notes;
+  - `--version` output that names the embedded runtime;
+  - `strings <binary> | grep` for its version string.
+- A marker string that appears only in fixed builds is a clue, not proof. If it says unpatched, believe it. If it says patched, still confirm the version.
+
+**Old code still loaded**
+- After a shared library or runtime is upgraded, long-running processes keep the old copy in memory until they restart: services, bots, agent gateways, dev servers and terminal multiplexers. Find them with `lsof -nP | grep <library>`, or compare process start times (`ps -o lstart= -p <pid>`) with the upgrade time.
+- Without sudo, `lsof` and `ps` show only the user's own processes. Say what you couldn't see under Checked.
+
+**Test behavior when you can**
+- Some advisories or incident pages publish a test endpoint, such as a site served with a revoked or compromised certificate chain. Run each affected client against it:
+  - the system `curl` and HTTP stack;
+  - every Python, pip and uv that installs packages;
+  - Node;
+  - the browsers.
+- Clients keep separate trust stores and libraries, so one result doesn't cover the others. Read the advisory for what each outcome means: usually an error means safe and a success means affected. A timeout is unknown, so report it as unknown.
+
+**Reachability**
+- `lsof -nP -iTCP -sTCP:LISTEN` (macOS) or `ss -ltnp` (Linux) shows what listens on every interface (`*`, `0.0.0.0`, `[::]`) rather than only on localhost. That decides whether a bug in a service or dev server can be reached from the network.
+- For client-side bugs (decoders, parsers, TLS), the exposure comes from what fetches untrusted content: browsers, agents, bots and link previewers. Tools that talk only to the user's own hosts matter less.
+
 ## Dependencies
 
 - **First choice, `osv-scanner`.** It covers most ecosystems and lockfiles in one pass: `osv-scanner scan source -r <project> --format json`. In the JSON, `groups[].max_severity` is the CVSS score, and `affected[].ranges[].events[].fixed` gives the fixed versions.
@@ -89,6 +113,7 @@ What the user has to patch depends on who runs what.
 
   Use the panel's read-only API or CLI to list apps and their health, with whatever saved authentication the user has set up. Never paste tokens into commands or files.
 - **Managed databases and backends** (Supabase, Neon, RDS, PlanetScale, Firebase). The provider patches the service. Check provider advisories and the client libraries the projects use.
+- **Breached platforms.** When a platform the user uses reports a breach, it's a finding even without a CVE. List the secrets the user keeps there: env vars, API keys, deploy tokens, connected repositories. The fix is to rotate each secret and revoke the old one, not to patch. Mark it `fixed` only when every listed secret is rotated.
 
 ## Sites
 

@@ -89,6 +89,7 @@ Their answers about known issues go straight into the ledger ([ledger.md](ledger
 ## Hosting
 - Vercel (managed runtime: patch deps and the Node version setting)
 - Fly.io (Docker: we patch the base image)
+- Secrets kept on each platform (names only, never values): Vercel env vars, Fly.io deploy token
 
 ## Servers
 | Host | Access | OS | Runs |
