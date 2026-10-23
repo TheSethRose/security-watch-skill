@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting platforms and websites, then work with them to fix it. Learns their real stack from the conversation, memory, project files and a few questions instead of assuming any provider, checks current advisories, and keeps a ledger of findings and decisions so each run flags what is new or changed and still lists everything that affects them, including deferred and ignored items. Use whenever the user asks what they need to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, a check of whether a new advisory affects them, or a recurring/daily security watch, even if they don't say "security watch". Not for penetration testing or for systems the user doesn't own or run.
 metadata:
-  version: "1.6.1"
+  version: "1.6.2"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -96,8 +96,8 @@ The user decides what changes. Asking for a check is a read-only request.
 - **A fix isn't done until it's running.** A merged fix still has to be deployed, rebuilt or restarted. On a device, that includes long-running processes still holding the old library, and tools that bundle their own copy ([checks.md](references/checks.md)). Verify on the running system: deployed commit or version, service health, and the check that found it no longer finding it. Then mark the item `fixed` with that evidence. Before deploying, note what you'd roll back to (the previous commit, image or deployment). It is still vulnerable, so roll back only to buy time.
 - **Know how to undo it.** Before a config change, back up the file and write the undo command in the item's note. Before a restart, say what the service does and who uses it.
 - **Run nothing you haven't read.** Never pipe a remote script into a shell. Download it, read it, then run it with approval.
-- **Rotate in the right order.** For an exposed secret: create the new one at the provider, update every place that uses it and redeploy, confirm it works, then revoke the old one. For a stolen session or a compromised account, also sign out every session and review connected apps.
-- **Clean the machine first.** If a device shows signs of compromise, stop fixing. Rotating secrets from an infected machine hands the new ones to the attacker. The user cleans or rebuilds it, then rotates from a clean device.
+- **Rotate in the right order.** For an exposed secret: create the new one at the provider, update every place that uses it and redeploy, confirm it works, then revoke the old one. If there are signs the secret is being used by someone else, revoke it first and accept the downtime. For a stolen session or a compromised account, also sign out every session and review connected apps.
+- **Clean the machine first.** If a device shows signs of compromise, finish the report but do no fixing. Rotating secrets from an infected machine hands the new ones to the attacker. The user cleans or rebuilds it, then rotates from a clean device.
 - **Install tools carefully.** Use exact package names from the tool's official docs. Before installing anything not already on the machine, show the repository, maintainer and latest release date, and ask.
 - **Hand over what needs a person.** Ask before every `sudo`. Give the user steps that need a password, a system dialog or a hardware key, rather than retrying them.
 - **When upstream has no fix,** set the item to `waiting` or `accepted`. Give it a concrete recheck: the upstream issue or PR link, the version to watch for, or a date. It stays listed under Deferred, and moves to Action needed when that trigger fires. A mitigation, such as a config switch or a proxy limit, lowers the risk but doesn't remove it: record it in the item's note and keep the item `waiting`.

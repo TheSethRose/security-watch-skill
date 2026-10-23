@@ -2,6 +2,13 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.6.2 (2026-10-23)
+
+- Secrets and credentials checks no longer assume particular tools: they use whatever CLI, API or settings page the user has, and say which.
+- More places to check for hidden access: SSH login keys on every machine, macOS profiles, Linux shell startup files and the Windows Startup folder. Startup entries are saved as a baseline, so later runs show only what's new.
+- Container checks catch secret files copied into images.
+- A secret someone else is using gets revoked first. A compromised machine still gets a full report, with nothing fixed until it's clean.
+
 ## 1.6.1 (2026-10-23)
 
 - New secrets and credentials checks: secrets in code, history and container images (names and locations only), and an inventory of keys and tokens with their age.

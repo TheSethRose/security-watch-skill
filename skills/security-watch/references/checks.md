@@ -50,9 +50,14 @@ Contents: device · dependencies · secrets and credentials · containers · ser
 - Clients keep separate trust stores and libraries, so one result doesn't cover the others. Read the advisory for what each outcome means: usually an error means safe and a success means affected. A timeout is unknown, so report it as unknown.
 
 **Persistence and poisoned packages**
-- List what starts on its own: `~/Library/LaunchAgents`, `/Library/LaunchAgents`, `/Library/LaunchDaemons` and login items (macOS); `systemctl list-unit-files --state=enabled`, user units and `crontab -l` (Linux); scheduled tasks and Run keys (Windows). Flag entries the user doesn't recognize, with their path and target. Report; don't remove.
-- When an advisory about a malicious package gives indicators (exact versions, dropped files, domains), check global installs too, not only projects: `npm ls -g`, `bun pm ls -g`, `pip list` for each Python, `uv tool list`, `pipx list`.
-- Signs of compromise (an unknown persistence entry, an indicator match) stop the run's fixing: say so first, and have the user clean or rebuild the machine before rotating anything from it.
+- List what starts on its own, for the OS in front of you:
+  - macOS: `~/Library/LaunchAgents`, `/Library/LaunchAgents`, `/Library/LaunchDaemons`, login items, and configuration profiles (`profiles list`).
+  - Linux: enabled system and user services (`systemctl list-unit-files --state=enabled`, `systemctl --user list-unit-files --state=enabled`), `crontab -l`, and shell startup files (`~/.bashrc`, `~/.zshrc`, `~/.profile`).
+  - Windows: scheduled tasks, Run keys and the Startup folder.
+  - Every machine and server: `~/.ssh/authorized_keys` for each user that can log in. An unknown key is a way back in.
+- Save these as a baseline in the state folder (paths, targets and key fingerprints, never file contents). At setup, show the user the full list once. After that, report only entries that are new or changed since the baseline, and update it when the user confirms them. Report; don't remove.
+- When an advisory about a malicious package gives indicators (exact versions, dropped files, domains), check globally installed packages too, not only projects, with whichever package managers the machine has (for example `npm ls -g`, `pip list` for each Python, `pipx list`).
+- Signs of compromise (an unknown startup entry or login key, an indicator match): finish the read-only report, put the compromise first under Action needed, and do no fixing or rotation until the user has cleaned or rebuilt the machine.
 
 **Reachability**
 - `lsof -nP -iTCP -sTCP:LISTEN` (macOS) or `ss -ltnp` (Linux) shows what listens on every interface (`*`, `0.0.0.0`, `[::]`) rather than only on localhost. That decides whether a bug in a service or dev server can be reached from the network.
@@ -86,8 +91,10 @@ A bundler that pins a vulnerable transitive dependency often needs an override o
 
 Report names and locations only. Never print a value, even masked.
 
-- **Secrets in the wrong places:** `gitleaks dir <path> --redact` for code and config folders, and `gitleaks git <repo> --redact` for history. Report the rule, file and commit, and count history hits rather than listing them. Note `.env` files that are tracked in git or world-readable, without opening them.
-- **Credential inventory:** list keys and tokens with their scope and age, read-only: GitHub SSH keys, deploy keys and authorized OAuth apps (`gh ssh-key list`, `gh api user/installations`), cloud and hosting tokens the CLIs can list. Flag ones that are unused, broader than needed, or older than about a year. Record names, scopes and dates in the inventory, never values.
+Don't assume a tool is installed or signed in. For each check, use what the user already has: a CLI that's installed and signed in, the provider's API with saved authentication, or failing those, a manual step in the provider's web settings that the user does and reports back. Say under Checked which method each check used, or that it was skipped and why. Scheduled runs skip anything that needs a login.
+
+- **Secrets in the wrong places:** a secret scanner with redaction, such as `gitleaks` (v8.19+: `gitleaks dir <path> --redact` and `gitleaks git <repo> --redact`; older: `gitleaks detect --no-git --source <path> --redact` and `gitleaks detect --source <repo> --redact`) or `trufflehog filesystem <path>`. Write any report file outside the project, never inside it. Report the rule, file and commit, and count history hits rather than listing them. Without a scanner, at least check that `.env` and key files are listed in `.gitignore` and not tracked (`git ls-files`), and say the scan didn't run. Never open `.env` files.
+- **Credential inventory:** list the keys and tokens on each account the user has, with scope and age, read-only. Typical ones: SSH keys and deploy keys on the code host, apps and integrations the user has authorized there, and API tokens on cloud and hosting accounts. Many providers have no API for authorized apps, so that one is usually a settings page the user checks. Rank by risk: broad or write access first, then unused, then age. Record names, scopes and dates in the inventory, never values.
 - A secret found anywhere it shouldn't be counts as exposed: the fix is rotation (see Fixing in SKILL.md), not deleting the file.
 
 ## Containers
@@ -97,6 +104,7 @@ Report names and locations only. Never print a value, even masked.
 - How the image is pinned decides the fix. An exact tag moves to the fixed tag, keeping its variant (`-slim`, `-alpine`). A digest pin needs the new digest. A floating tag (`node:24`, `latest`) needs only a rebuild with `--pull --no-cache` and a redeploy.
 - CVEs that are still in the latest upstream image aren't the user's to fix. Record them as `waiting` on a newer image.
 - Secrets baked into images: `docker history --no-trunc <image>` shows build args and `ENV` lines. Report the variable names only. A secret passed as a build arg is readable by anyone who can pull the image, so it needs rotating and moving to runtime env or a build secret.
+- Secrets copied into images: a broad copy such as `COPY . .` takes in `.env` and key files unless `.dockerignore` excludes them. Check that it lists `.env*` and any key or credential files the project has.
 - On servers, list what's actually running: `docker ps --format '{{.Image}} {{.Status}}'`. A rebuilt image doesn't help until the container is recreated.
 
 ## Servers (SSH)
