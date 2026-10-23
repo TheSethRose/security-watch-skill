@@ -2,7 +2,7 @@
 
 Run the checks that match the inventory, and skip areas the user doesn't have. Every command here is read-only, apart from refreshing package metadata. When a tool isn't installed, use the fallback or note the gap under "Checked". Don't install tools without asking.
 
-Contents: device · dependencies · containers · servers · hosting platforms · sites · AI agents · deployed vs fixed.
+Contents: device · dependencies · secrets and credentials · containers · servers · hosting platforms · sites · AI agents · deployed vs fixed.
 
 ## Device
 
@@ -49,6 +49,11 @@ Contents: device · dependencies · containers · servers · hosting platforms �
   - the browsers.
 - Clients keep separate trust stores and libraries, so one result doesn't cover the others. Read the advisory for what each outcome means: usually an error means safe and a success means affected. A timeout is unknown, so report it as unknown.
 
+**Persistence and poisoned packages**
+- List what starts on its own: `~/Library/LaunchAgents`, `/Library/LaunchAgents`, `/Library/LaunchDaemons` and login items (macOS); `systemctl list-unit-files --state=enabled`, user units and `crontab -l` (Linux); scheduled tasks and Run keys (Windows). Flag entries the user doesn't recognize, with their path and target. Report; don't remove.
+- When an advisory about a malicious package gives indicators (exact versions, dropped files, domains), check global installs too, not only projects: `npm ls -g`, `bun pm ls -g`, `pip list` for each Python, `uv tool list`, `pipx list`.
+- Signs of compromise (an unknown persistence entry, an indicator match) stop the run's fixing: say so first, and have the user clean or rebuild the machine before rotating anything from it.
+
 **Reachability**
 - `lsof -nP -iTCP -sTCP:LISTEN` (macOS) or `ss -ltnp` (Linux) shows what listens on every interface (`*`, `0.0.0.0`, `[::]`) rather than only on localhost. That decides whether a bug in a service or dev server can be reached from the network.
 - For client-side bugs (decoders, parsers, TLS), the exposure comes from what fetches untrusted content: browsers, agents, bots and link previewers. Tools that talk only to the user's own hosts matter less.
@@ -77,12 +82,21 @@ Focus by default on high and critical findings (CVSS 7+), plus anything exploite
 
 A bundler that pins a vulnerable transitive dependency often needs an override or resolution entry rather than a direct upgrade. Check whether every dependent accepts the fixed version before suggesting one.
 
+## Secrets and credentials
+
+Report names and locations only. Never print a value, even masked.
+
+- **Secrets in the wrong places:** `gitleaks dir <path> --redact` for code and config folders, and `gitleaks git <repo> --redact` for history. Report the rule, file and commit, and count history hits rather than listing them. Note `.env` files that are tracked in git or world-readable, without opening them.
+- **Credential inventory:** list keys and tokens with their scope and age, read-only: GitHub SSH keys, deploy keys and authorized OAuth apps (`gh ssh-key list`, `gh api user/installations`), cloud and hosting tokens the CLIs can list. Flag ones that are unused, broader than needed, or older than about a year. Record names, scopes and dates in the inventory, never values.
+- A secret found anywhere it shouldn't be counts as exposed: the fix is rotation (see Fixing in SKILL.md), not deleting the file.
+
 ## Containers
 
 - Scan the base images and app images: `trivy image --scanners vuln --severity CRITICAL,HIGH --ignore-unfixed <image>`, or `grype <image>`, or `docker scout cves <image>`.
 - Check whether a newer tag of the same line exists. Many image CVEs are fixed simply by rebuilding on a fresh base.
 - How the image is pinned decides the fix. An exact tag moves to the fixed tag, keeping its variant (`-slim`, `-alpine`). A digest pin needs the new digest. A floating tag (`node:24`, `latest`) needs only a rebuild with `--pull --no-cache` and a redeploy.
 - CVEs that are still in the latest upstream image aren't the user's to fix. Record them as `waiting` on a newer image.
+- Secrets baked into images: `docker history --no-trunc <image>` shows build args and `ENV` lines. Report the variable names only. A secret passed as a build arg is readable by anyone who can pull the image, so it needs rotating and moving to runtime env or a build secret.
 - On servers, list what's actually running: `docker ps --format '{{.Image}} {{.Status}}'`. A rebuilt image doesn't help until the container is recreated.
 
 ## Servers (SSH)

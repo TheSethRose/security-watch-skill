@@ -2,6 +2,12 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.6.1 (2026-10-23)
+
+- New secrets and credentials checks: secrets in code, history and container images (names and locations only), and an inventory of keys and tokens with their age.
+- Device checks list what starts on its own, and check global packages against indicators from malicious-package advisories.
+- Fixing rules: rotate secrets in a safe order, clean a compromised machine before rotating, and confirm a new tool's source before installing it.
+
 ## 1.6.0 (2026-10-23)
 
 - New server exposure checks: what listens, what the provider firewall allows, what public scanners see, whether sites behind a CDN can be reached straight at the origin, and whether hostnames bypass the CDN.

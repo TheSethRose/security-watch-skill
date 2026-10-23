@@ -101,6 +101,9 @@ Their answers about known issues go straight into the ledger ([ledger.md](ledger
 |---|---|---|
 | https://shop.example.com | Vercel | 200 |
 
+## Credentials
+<!-- Names, scopes and ages only, never values: "GitHub SSH key laptop-2025 (2025-03)", "Hetzner API token, read-write (2026-01)". -->
+
 ## Advisory sources
 <!-- Pick from sources.md to match the stack above. -->
 
