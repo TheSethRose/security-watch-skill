@@ -2,6 +2,11 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.7.0 (2026-10-24)
+
+- Optional threat notes for each project in the inventory: where untrusted input enters, what matters most, what is out of scope, and how you rate severity. Setup drafts them from `SECURITY.md`, threat models and READMEs.
+- Triage applies them: out-of-scope findings are listed as ignored with the reason, and your severity rating is shown next to the advisory's and sets the order of Action needed.
+
 ## 1.6.2 (2026-10-23)
 
 - Secrets and credentials checks no longer assume particular tools: they use whatever CLI, API or settings page the user has, and say which.

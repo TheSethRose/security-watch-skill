@@ -29,7 +29,8 @@ Only look where the user expects you to.
 - In each project, note:
   - lockfiles: `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, `uv.lock`, `poetry.lock`, `requirements*.txt`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, `composer.lock`, `*.csproj`;
   - Dockerfiles and compose files, with their base images;
-  - runtime pins: `.nvmrc`, `.node-version`, `.python-version`, `engines`, `.tool-versions`.
+  - runtime pins: `.nvmrc`, `.node-version`, `.python-version`, `engines`, `.tool-versions`;
+  - anything that states the project's security goals: `SECURITY.md`, a threat model, or notes in the README. Use them to draft the project's threat notes in the inventory.
 
 **Hosting signals.** Treat these as hints, not answers, and confirm with the user:
 
@@ -66,6 +67,7 @@ Show a draft inventory grouped by area and ask the user to correct it in one rep
 - where each one is hosted;
 - which servers are theirs;
 - anything they already know is vulnerable, or have decided to accept;
+- for production projects without threat notes: what takes untrusted input, and anything they rate differently from CVSS (one line each is enough; skip if they have no view);
 - if they use AI agents: the personal details to watch for in agent requests, and which domains are theirs ([agent-privacy.md](agent-privacy.md)).
 
 Their answers about known issues go straight into the ledger ([ledger.md](ledger.md)).
@@ -85,6 +87,13 @@ Their answers about known issues go straight into the ledger ([ledger.md](ledger
 |---|---|---|---|---|---|
 | shop-web | ~/code/shop-web | Next.js 15, Node 22 | package-lock.json | Vercel | yes |
 | api | ~/code/api | FastAPI, Python 3.12 | uv.lock, Dockerfile (python:3.12-slim) | Fly.io | yes |
+
+## Threat notes
+<!-- Optional, per project: where untrusted input enters, what matters most, what is out of scope, and how the user rates severity. Triage applies these (SKILL.md step 4). -->
+### api
+- Untrusted input: public JSON API; webhooks from Stripe (signature checked)
+- Matters most: auth and billing routes; out of scope: scripts/ (run by hand, never deployed)
+- Severity: anything reachable before login is at least high; DoS is medium
 
 ## Hosting
 - Vercel (managed runtime: patch deps and the Node version setting)

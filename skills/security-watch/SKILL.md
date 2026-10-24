@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting platforms and websites, then work with them to fix it. Learns their real stack from the conversation, memory, project files and a few questions instead of assuming any provider, checks current advisories, and keeps a ledger of findings and decisions so each run flags what is new or changed and still lists everything that affects them, including deferred and ignored items. Use whenever the user asks what they need to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, a check of whether a new advisory affects them, or a recurring/daily security watch, even if they don't say "security watch". Not for penetration testing or for systems the user doesn't own or run.
 metadata:
-  version: "1.6.2"
+  version: "1.7.0"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -41,6 +41,7 @@ Never write secrets into these files: no tokens, passwords, connection strings o
    - the installed version is in the affected range;
    - the component is really used (production code, not only a dev tool);
    - note whether it is reachable from the internet.
+   Then apply the project's threat notes from the inventory, if it has any. A finding in a component they mark out of scope still goes in the ledger, as `ignored` with that reason, so it is listed rather than dropped. Where their severity rules differ from the advisory, keep the advisory's severity and add their rating with the rule that set it ("CVSS 6.5; high per api threat notes: pre-auth"), and order Action needed by their rating.
    Cite the advisory for every version or severity claim. Don't guess.
 5. **Report** in the format below and save it to `reports/`. Read the current local date and time first (`date`); don't infer them.
 6. **Fix with the user** (see Fixing). Update the ledger as each item moves.

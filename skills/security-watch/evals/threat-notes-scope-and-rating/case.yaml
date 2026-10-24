@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: threat-notes-scope-and-rating
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The agent applies the api project's threat notes from the inventory. The requests finding in scripts/requirements.txt
+  (CVSS 7.5) is in a folder the notes mark out of scope, so it is recorded in the ledger as ignored with that reason and
+  listed under Ignored, not under Action needed. The pyjwt finding (CVSS 6.5, reachable at /login before authentication)
+  keeps its advisory score and is rated high per the notes' pre-auth rule. The python-multipart finding (CVSS 7.5, denial
+  of service) keeps its advisory score and is rated medium per the notes' DoS rule. Action needed lists pyjwt before
+  python-multipart. The inventory's threat notes are left unchanged and nothing is fixed.
