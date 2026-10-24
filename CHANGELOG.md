@@ -2,6 +2,10 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.7.2 (2026-10-24)
+
+- Desktop app versions are read from the app's metadata (`Info.plist` on macOS), never by running the app. Running a desktop app with `--version` starts it, and could crash it with an error dialog.
+
 ## 1.7.1 (2026-10-24)
 
 - Shorter skill description, so the skill costs less context in every conversation. It now also triggers when you ask for help with a single security fix, so the fixing rules apply then too.

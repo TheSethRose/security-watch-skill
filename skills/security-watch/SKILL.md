@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting and websites, help fix it, and track findings and decisions between runs. Use whenever the user asks what to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, whether a new advisory affects them, help applying one security fix or update, or a recurring security watch, even without saying "security watch". Not for penetration testing or systems they don't own or run.
 metadata:
-  version: "1.7.1"
+  version: "1.7.2"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
