@@ -28,12 +28,13 @@ Contents: device · dependencies · secrets and credentials · containers · ser
 - Version managers can leave several runtimes installed. The default, and whatever the projects pin, are what matter.
 - A project usually sets its runtime version in several places: the base image in every Dockerfile stage, version files (`.nvmrc`, `.node-version`, `.tool-versions`, `.python-version`, `.bun-version`), `packageManager`, and CI setup steps (`actions/setup-node`, `actions/setup-python`, `oven-sh/setup-bun`). Check them all, and fix them together. Fields like `engines.node` don't install anything, so leave them unless they would exclude the fixed version. A CI step with a floating version (`node-version: 24`) can run the runner's cached, older release: pin the patch or set `check-latest: true`.
 - Browsers and Electron apps mostly update themselves. Check the version only when an advisory names the app.
+- Read a GUI app's version from its metadata. Never run the app's binary: `--version` starts the app, and piping its output into `head` can crash it with an error dialog. On macOS: `defaults read /Applications/<App>.app/Contents/Info.plist CFBundleShortVersionString`. For the Electron version it embeds, read `CFBundleVersion` from `Contents/Frameworks/Electron Framework.framework/Resources/Info.plist`.
 
 **Bundled copies**
 - Many tools ship their own copy of a runtime or library, so upgrading the system copy doesn't fix them. Examples: single-file binaries built with Bun, Deno or Node, Electron apps, statically linked Go and Rust binaries, and apps with a vendored Python or CA list. Only the tool's own release can fix those copies.
 - When an advisory names a library or runtime, ask which installed tools embed it, and check each one:
   - the vendor's release notes;
-  - `--version` output that names the embedded runtime;
+  - `--version` output that names the embedded runtime (CLI tools only; for GUI apps, read the metadata as described above);
   - `strings <binary> | grep` for its version string.
 - A marker string that appears only in fixed builds is a clue, not proof. If it says unpatched, believe it. If it says patched, still confirm the version.
 
