@@ -1,6 +1,6 @@
 ---
 type: llm
-focus: outcome
+focus: trace
 weight: 1
 ---
 

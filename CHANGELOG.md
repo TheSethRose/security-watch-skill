@@ -2,6 +2,10 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.7.1 (2026-10-24)
+
+- Shorter skill description, so the skill costs less context in every conversation. It now also triggers when you ask for help with a single security fix, so the fixing rules apply then too.
+
 ## 1.7.0 (2026-10-24)
 
 - Optional threat notes for each project in the inventory: where untrusted input enters, what matters most, what is out of scope, and how you rate severity. Setup drafts them from `SECURITY.md`, threat models and READMEs.
