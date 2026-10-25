@@ -18,6 +18,8 @@ The ledger is what turns "every CVE, every day" into "what changed since we last
       "where": "shop-web (package-lock.json)",
       "severity": "critical (CVSS 9.1)",
       "installed": "15.2.1",
+      "reach": "unconfirmed",
+      "reach_reason": "middleware.ts not read; unknown whether it guards /admin",
       "fixed_in": "15.2.3",
       "status": "open",
       "first_seen": "2026-10-20",
@@ -45,7 +47,23 @@ The ledger is what turns "every CVE, every day" into "what changed since we last
 - `findings` holds things that need, or needed, action on the user's systems.
 - `reviewed` holds every advisory, feed item or news story you looked at, whether it was relevant or not, keyed by URL or CVE. It exists so you never read the same item twice.
 - When an advisory turns out to affect the user, it gets a finding as well.
+- `reach` (optional) says whether the vulnerable code path can be hit: `reachable`, `not_reachable` or `unconfirmed`. `reach_reason` is one line: the missing guard, or what you did not read. Leave both out where reach doesn't apply, such as OS updates.
 - `hidden` (optional, `ignored` items only) means the user asked to stop seeing that item in reports. `hidden_on` records when.
+
+## Known-bad versions
+
+`known-bad.md` in the state folder lists package versions known to be compromised. Checks run it offline, before any advisory lookup. It holds one table:
+
+```markdown
+| Ecosystem | Package | Versions | Evidence | Added |
+|---|---|---|---|---|
+| npm | example-widget | 4.2.1, 4.2.2 | https://example.com/advisory/widget-takedown | 2026-10-20 |
+```
+
+- Versions are exact. No ranges and no "and later".
+- Add an entry only with evidence: a vendor advisory, a registry takedown notice, or an artifact you reproduced. Suspicion is not enough.
+- Add entries from the supply-chain stories you review ([sources.md](sources.md)), even when nothing matches today. Never delete one: a compromised version stays compromised.
+- A match is a finding with ID `dep:<where>:<package>:known-bad`. Treat it as a possible compromise ([checks.md](checks.md)).
 
 ## IDs
 
@@ -69,6 +87,16 @@ An ID must stay the same from run to run for the same problem. Build it as `<are
 
 Every finding that isn't `fixed` appears in every report, in exactly one section. That way a deferred item can't be forgotten just because nothing about it changed.
 
+## Reach
+
+Triage sets `reach` on each dependency finding:
+
+- `reachable`: you saw the vulnerable path used, with nothing guarding it.
+- `not_reachable`: you read the code and the path is unused or guarded. Say which in `reach_reason`.
+- `unconfirmed`: you could not tell. Say what you didn't read.
+
+An `unconfirmed` item stays `open` under To do. Never set it to `ignored` or `accepted` yourself. Only the user, or a threat-notes out-of-scope rule, moves it out. Once you've read the code, change it to `reachable` or `not_reachable`.
+
 ## Classifying a run
 
 Compare each result with the ledger:
@@ -83,7 +111,7 @@ Compare each result with the ledger:
   Report it and update the entry.
 - **Due:** a `waiting` or `accepted` item whose recheck condition is now met: the date has passed, the upstream fix shipped, or the watched version exists. Also an `open` item last reported more than `remind_after_days` ago, which gets one reminder line. Report it and reset `last_reported`.
 - **Unchanged:** everything else. Update `last_seen` and list it in its section: `open` under To do, `waiting`, `fixing` and `accepted` under Deferred, and `ignored` under Ignored (unless `hidden`). Group lines by root cause and name every component in the group.
-- **Resolved:** a check that ran successfully no longer finds it. Verify it, then mark it `fixed` with the date and evidence. Never resolve an item because its check failed or was skipped.
+- **Resolved:** a check that ran successfully no longer finds it. Verify it, then run the variant sweep (SKILL.md, Fixing): search every project, image, host and global install for the same vulnerable pin or config. Mark it `fixed` with the date, the evidence, and the sweep command and hit count in the note, such as "sweep: `grep -rn 'next@15.2.1' ~/code` found 0 more". Never resolve an item because its check failed or was skipped.
 
 Fill in a recheck so the next run can test it without judgment. Good: "Homebrew `node` formula ≥ 26.12.1", "after 2026-11-01", "https://github.com/owner/repo/pull/123 released". Bad: "check later".
 

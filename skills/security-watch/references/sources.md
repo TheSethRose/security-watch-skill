@@ -106,7 +106,7 @@ Keyword-filter all of these. They're how compromised packages, CA incidents and 
 
 When a story reports a breach at a platform or service the user uses, check which of their secrets it holds ([checks.md](checks.md), Hosting platforms). Platform names belong in the inventory's keywords.
 
-When a supply-chain story names compromised versions, search every lockfile and the device's global tool installs for them, for example `npm ls -g`, `pip list`, `uv tool list` and `pipx list`. The answer is usually "not affected", and saying so with evidence is useful.
+When a supply-chain story names compromised versions, add them to `known-bad.md` if the story meets its evidence bar ([ledger.md](ledger.md)). Then search every lockfile and the device's global tool installs for them, for example `npm ls -g`, `pip list`, `uv tool list` and `pipx list`. The answer is usually "not affected", and saying so with evidence is useful.
 
 ## Generic patterns
 

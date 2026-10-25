@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "last_run": "2026-10-24",
+  "remind_after_days": 30,
+  "findings": {
+    "dep:billing:xml-tools:GHSA-aaaa-bbbb-cccc": {
+      "title": "xml-tools external entity expansion in parseDocument()",
+      "area": "dependencies",
+      "where": "billing (package-lock.json)",
+      "severity": "high (CVSS 7.5)",
+      "installed": "3.1.0",
+      "fixed_in": "3.1.4",
+      "status": "open",
+      "first_seen": "2026-10-24",
+      "last_seen": "2026-10-24",
+      "last_reported": "2026-10-24",
+      "note": "",
+      "recheck": "",
+      "source": "https://example.com/advisories/GHSA-aaaa-bbbb-cccc"
+    }
+  },
+  "reviewed": {}
+}

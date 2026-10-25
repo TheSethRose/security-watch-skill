@@ -2,7 +2,7 @@
 name: security-watch
 description: Find what needs patching across the user's own devices, code projects, servers, hosting and websites, help fix it, and track findings and decisions between runs. Use whenever the user asks what to patch or update, wants a security or vulnerability sweep, a CVE or dependency audit, server patch status, whether a new advisory affects them, help applying one security fix or update, or a recurring security watch, even without saying "security watch". Not for penetration testing or systems they don't own or run.
 metadata:
-  version: "1.7.2"
+  version: "1.8.0"
   repository: https://github.com/TheSethRose/security-watch-skill
 ---
 
@@ -21,6 +21,7 @@ Use the folder the user already has for this. If there isn't one, create `~/.sec
 |---|---|
 | `inventory.md` | What they run and where each fact came from. Template in [discovery.md](references/discovery.md). |
 | `ledger.json` | Every finding and every advisory reviewed, with its status and what was decided. Format in [ledger.md](references/ledger.md). |
+| `known-bad.md` | Package versions known to be compromised, each with the evidence for it. You keep it up to date. Format in [ledger.md](references/ledger.md). |
 | `reports/YYYY-MM-DD.md` | One report per run. A second run on the same day gets `YYYY-MM-DD-HHMM.md`, so earlier reports are kept. |
 | `privacy.json` | Only if they use AI agents: the personal details the agent privacy check looks for, and their own domains. Mode 600. See [agent-privacy.md](references/agent-privacy.md). |
 
@@ -36,11 +37,12 @@ Never write secrets into these files: no tokens, passwords, connection strings o
    - No inventory yet: run setup first ([discovery.md](references/discovery.md)).
    - Inventory older than about 30 days, or the conversation mentions something it doesn't list: update it.
 2. **Record what has already been discussed.** Before checking anything, scan the conversation and any memory for decisions about specific issues. Examples: "we know about that one, no fix yet", "patched it yesterday", "staging doesn't matter", "waiting on the vendor", "stop showing me that one". Add or update ledger entries for each one, with the date and the decision. This is what keeps old items from being reported as new.
-3. **Find.** Work through each inventory area with [checks.md](references/checks.md), including what each server exposes to the internet, and check advisories published since the last run with [sources.md](references/sources.md). If they use AI agents, also scan agent transcripts for personal details sent to other sites ([agent-privacy.md](references/agent-privacy.md)). Finding is read-only.
+3. **Find.** Check `known-bad.md` against every lockfile and global install first. It needs no network ([checks.md](references/checks.md)). Then work through each inventory area with [checks.md](references/checks.md), including what each server exposes to the internet, and check advisories published since the last run with [sources.md](references/sources.md). If they use AI agents, also scan agent transcripts for personal details sent to other sites ([agent-privacy.md](references/agent-privacy.md)). Finding is read-only.
 4. **Triage against the ledger** ([ledger.md](references/ledger.md)). Sort every result into New, Changed, Due, Unchanged or Resolved. Before calling anything New or Changed, confirm it applies:
    - the installed version is in the affected range;
    - the component is really used (production code, not only a dev tool);
-   - note whether it is reachable from the internet.
+   - note whether it is reachable from the internet;
+   - set its `reach` in the ledger: can the vulnerable code path be hit? An item you couldn't confirm is `unconfirmed`. It stays in To do and is never set to `ignored` on a guess.
    Then apply the project's threat notes from the inventory, if it has any. A finding in a component they mark out of scope still goes in the ledger, as `ignored` with that reason, so it is listed rather than dropped. Where their severity rules differ from the advisory, keep the advisory's severity and add their rating with the rule that set it ("CVSS 6.5; high per api threat notes: pre-auth"), and order Action needed by their rating.
    Cite the advisory for every version or severity claim. Don't guess.
 5. **Report** in the format below and save it to `reports/`. Read the current local date and time first (`date`); don't infer them.
@@ -75,7 +77,7 @@ Every run lists **every finding that still affects the user**, so nothing slips 
 <!-- Items resolved this run, with the evidence. Omit the section when there are none. -->
 
 ## Checked
-<!-- What ran, what failed, what was skipped and why: missing tool, needs a login, host unreachable. Also what a check couldn't see, such as other users' processes without sudo. -->
+<!-- What ran, what failed, what was skipped and why: missing tool, needs a login, host unreachable. Also what a check couldn't see, such as other users' processes without sudo. Add a line per blind spot: "Could not see: <X>. Would need: <Y>." -->
 ```
 
 Keep each line short, and group findings that share a root cause, but name every affected component in the group ("shop-web: 6 findings: next, braces 3, postcss 2"). A long report is fine; a report that leaves something out is not.
@@ -83,6 +85,8 @@ Keep each line short, and group findings that share a root cause, but name every
 **Dates, not times of day.** Use the date and time you read from the clock. Never write "tonight", "this morning" or "this evening": you don't know the user's day, and a scheduled report may be read hours later. Refer to the previous run by its date and time ("since the 2026-10-22 09:15 run").
 
 If nothing is new or changed, say so in one line at the top, then list the other sections as usual. Never say everything is fine while To do has items.
+
+**No findings is not "safe".** The checks find known issues in what you can see. They don't find flaws in the user's own code, or in components with no lockfile or version. State those blind spots under Checked as "Could not see" lines, and word a clean result as "nothing known found in what I could check".
 
 **Hiding ignored items.** When the user says to stop showing an ignored item, set `hidden: true` on it in the ledger with the date, and leave it out of the Ignored list from then on. Keep counting it in the "hidden at your request" line, so they know it is still tracked. If they ask to see hidden items, or to show one again, list them or clear the flag. Only `ignored` items can be hidden: deferred items stay listed until they are fixed, because they still affect the user. If they want a deferred item gone, ask whether it should be `ignored` instead.
 
@@ -93,12 +97,13 @@ The user decides what changes. Asking for a check is a read-only request.
 - **Get approval before changing a system.** That covers upgrades, lockfile or dependency changes, commits and pushes, deploys, restarts and reboots, and config changes. Describe the change, what it touches and how you'll verify it. Approval for one change doesn't cover the next.
 - **Make the smallest change that removes the risk.** Follow the project's own rules (AGENTS.md, CLAUDE.md, CONTRIBUTING), its package manager and lockfile, and its tests. Run the tests before and after the change: failures that were already there aren't regressions, but say they exist. Preserve uncommitted work.
 - **Change every place that sets the version,** and test what ships. A runtime or base image is often pinned in several files ([checks.md](references/checks.md) lists where). For a container deploy, build the image, confirm the version inside it, then start it with its production command and request a health route.
-- **Be careful with brand-new releases.** They are a supply-chain risk. Prefer a fixed version that has been out a few days unless the issue is actively exploited or critical, and say which you chose. Respect any release-age cooldown the user has configured.
+- **Be careful with brand-new releases.** They are a supply-chain risk. Prefer a fixed version that has been out a few days unless the issue is actively exploited or critical, and say which you chose. Respect any release-age cooldown the user has configured, and flag any locked version younger than it ([checks.md](references/checks.md)).
+- **Sweep for variants before `fixed`.** After a fix, search the whole inventory for the same vulnerable pin or config: other projects, images, hosts and global installs. Record the search command and its hit count in the item's note, so the next run can repeat it. Any other hit is a finding of its own.
 - **A fix isn't done until it's running.** A merged fix still has to be deployed, rebuilt or restarted. On a device, that includes long-running processes still holding the old library, and tools that bundle their own copy ([checks.md](references/checks.md)). Verify on the running system: deployed commit or version, service health, and the check that found it no longer finding it. Then mark the item `fixed` with that evidence. Before deploying, note what you'd roll back to (the previous commit, image or deployment). It is still vulnerable, so roll back only to buy time.
 - **Know how to undo it.** Before a config change, back up the file and write the undo command in the item's note. Before a restart, say what the service does and who uses it.
 - **Run nothing you haven't read.** Never pipe a remote script into a shell. Download it, read it, then run it with approval.
 - **Rotate in the right order.** For an exposed secret: create the new one at the provider, update every place that uses it and redeploy, confirm it works, then revoke the old one. If there are signs the secret is being used by someone else, revoke it first and accept the downtime. For a stolen session or a compromised account, also sign out every session and review connected apps.
-- **Clean the machine first.** If a device shows signs of compromise, finish the report but do no fixing. Rotating secrets from an infected machine hands the new ones to the attacker. The user cleans or rebuilds it, then rotates from a clean device.
+- **Clean the machine first.** If a device shows signs of compromise, finish the report but do no fixing. Rotating secrets from an infected machine hands the new ones to the attacker. The user cleans or rebuilds it, then rotates from a clean device. Triage first with the "was it exploited?" steps in [checks.md](references/checks.md).
 - **Install tools carefully.** Use exact package names from the tool's official docs. Before installing anything not already on the machine, show the repository, maintainer and latest release date, and ask.
 - **Hand over what needs a person.** Ask before every `sudo`. Give the user steps that need a password, a system dialog or a hardware key, rather than retrying them.
 - **When upstream has no fix,** set the item to `waiting` or `accepted`. Give it a concrete recheck: the upstream issue or PR link, the version to watch for, or a date. It stays listed under Deferred, and moves to Action needed when that trigger fires. A mitigation, such as a config switch or a proxy limit, lowers the risk but doesn't remove it: record it in the item's note and keep the item `waiting`.

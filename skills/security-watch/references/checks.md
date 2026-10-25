@@ -59,6 +59,11 @@ Contents: device · dependencies · secrets and credentials · containers · ser
 - Save these as a baseline in the state folder (paths, targets and key fingerprints, never file contents). At setup, show the user the full list once. After that, report only entries that are new or changed since the baseline, and update it when the user confirms them. Report; don't remove.
 - When an advisory about a malicious package gives indicators (exact versions, dropped files, domains), check globally installed packages too, not only projects, with whichever package managers the machine has (for example `npm ls -g`, `pip list` for each Python, `pipx list`).
 - Signs of compromise (an unknown startup entry or login key, an indicator match): finish the read-only report, put the compromise first under Action needed, and do no fixing or rotation until the user has cleaned or rebuilt the machine.
+- **Was it exploited?** Where signs of compromise appear, add a short triage to the report. It is read-only. Go deeper (forensics) only if the user asks.
+  - Scope and window: which machine, account or project, and from when to when. Use the install or change date of the suspect item as the start.
+  - Log integrity: are the logs that cover the window complete, or cleared, truncated or rotated early? Say so. Missing logs are unknown, not clean.
+  - Ongoing or finished: is the suspect process, connection or key still active now?
+  - A probe is not a breach. A request that reached a path proves nothing alone. Look at the status code, the response size, and corroborating state, such as a new file, account, key or outbound connection, before you call it exploited. Report which of these you saw.
 
 **Reachability**
 - `lsof -nP -iTCP -sTCP:LISTEN` (macOS) or `ss -ltnp` (Linux) shows what listens on every interface (`*`, `0.0.0.0`, `[::]`) rather than only on localhost. That decides whether a bug in a service or dev server can be reached from the network.
@@ -66,6 +71,7 @@ Contents: device · dependencies · secrets and credentials · containers · ser
 
 ## Dependencies
 
+- **Known-bad versions first, offline.** Compare every lockfile and every global install (`npm ls -g`, `pip list`, `pipx list`, `uv tool list`) with `known-bad.md` in the state folder ([ledger.md](ledger.md)). A match is a possible compromise: follow the compromise rule under Persistence. No network is needed, so do this even when the advisory lookups fail.
 - **First choice, `osv-scanner`.** It covers most ecosystems and lockfiles in one pass: `osv-scanner scan source -r <project> --format json`. In the JSON, `groups[].max_severity` is the CVSS score, and `affected[].ranges[].events[].fixed` gives the fixed versions.
 - **Ecosystem-native fallbacks:**
 
@@ -84,6 +90,15 @@ Contents: device · dependencies · secrets and credentials · containers · ser
 
 - **GitHub Dependabot,** if it's enabled: `gh api "repos/<owner>/<repo>/dependabot/alerts?state=open"`.
 
+- **Lockfile hygiene (optional, read-only).** Read the lockfiles, without installing anything, and flag:
+  - a resolved URL on a host other than the expected registry;
+  - a missing integrity hash, or a weak one (SHA-1);
+  - a package name that doesn't match the name in its URL;
+  - dependencies fetched from git, a file path or a tarball URL;
+  - packages with install scripts;
+  - locked versions published more recently than the user's release-age cooldown (the brand-new-release rule in SKILL.md, Fixing).
+  Report these as low-priority findings, grouped by project.
+
 Focus by default on high and critical findings (CVSS 7+), plus anything exploited, in packages that ship to production. Note dev-only and build-only packages separately and at lower priority, but don't drop them silently.
 
 A bundler that pins a vulnerable transitive dependency often needs an override or resolution entry rather than a direct upgrade. Check whether every dependent accepts the fixed version before suggesting one.
@@ -96,6 +111,11 @@ Don't assume a tool is installed or signed in. For each check, use what the user
 
 - **Secrets in the wrong places:** a secret scanner with redaction, such as `gitleaks` (v8.19+: `gitleaks dir <path> --redact` and `gitleaks git <repo> --redact`; older: `gitleaks detect --no-git --source <path> --redact` and `gitleaks detect --source <repo> --redact`) or `trufflehog filesystem <path>`. Write any report file outside the project, never inside it. Report the rule, file and commit, and count history hits rather than listing them. Without a scanner, at least check that `.env` and key files are listed in `.gitignore` and not tracked (`git ls-files`), and say the scan didn't run. Never open `.env` files.
 - **Credential inventory:** list the keys and tokens on each account the user has, with scope and age, read-only. Typical ones: SSH keys and deploy keys on the code host, apps and integrations the user has authorized there, and API tokens on cloud and hosting accounts. Many providers have no API for authorized apps, so that one is usually a settings page the user checks. Rank by risk: broad or write access first, then unused, then age. Record names, scopes and dates in the inventory, never values.
+- **Is it live?** Don't send a secret anywhere to test it without the user's explicit approval. Without approval:
+  - for a JWT-style token, decode its payload offline and read only the role and expiry claims. Never print the token or other claims;
+  - for anything else, give the user the provider's own check or revoke step.
+  A live secret raises its priority. One confirmed dead and found only in history ranks lower, but stays listed.
+- **Placeholders and test context.** A hit in a test, fixture or example path, a value like `EXAMPLE`, `YOUR_…` or `changeme`, or one in a comment, is probably not real. Label it "likely placeholder" and rank it lower. Never drop it: say so, and let the user confirm.
 - A secret found anywhere it shouldn't be counts as exposed: the fix is rotation (see Fixing in SKILL.md), not deleting the file.
 
 ## Containers

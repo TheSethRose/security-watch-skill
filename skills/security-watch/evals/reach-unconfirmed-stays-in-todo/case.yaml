@@ -1,0 +1,20 @@
+schema_version: "1.1"
+name: reach-unconfirmed-stays-in-todo
+context:
+  scaffold_script: place-files.sh
+expected_outcome: |
+  The ledger already holds an open finding for the xml-tools package in the billing project. Today's evidence shows the
+  code that would call the vulnerable parser lives in a repository that is not on this machine, so reachability can't be
+  confirmed. The agent records reach "unconfirmed" with a reason that names what it could not read, keeps the item
+  "open", and lists it under To do. It does not set it to ignored or accepted, and does not list it under Ignored. The
+  Checked section has a "Could not see ... Would need ..." line for the missing repository. Nothing is fixed.
+---
+tags: [security-watch]
+max_turns: 30
+timeout_seconds: 900
+allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
+---
+
+Security check please. My state is in ./state. I already ran today's checks and put the results in ./evidence/today.md, so use that instead of running them again. Today is 2026-10-25. Do the run, update the state and save the report to ./state/reports/2026-10-25.md.
+
+Input files: state/, evidence/today.md

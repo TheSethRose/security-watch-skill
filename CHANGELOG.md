@@ -2,6 +2,17 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.8.0 (2026-10-25)
+
+- Known-compromised package versions are kept in a `known-bad.md` file in your state folder, each with its evidence. Every run checks your lockfiles and global installs against it first, offline. The skill adds entries from supply-chain stories it reads.
+- Reports now say what the skill could not see ("Could not see: X. Would need: Y."), and a clean result is worded as "nothing known found", not "safe".
+- Before a fix is marked `fixed`, the skill searches everything you run for the same vulnerable version or setting, and records the search so the next run can repeat it.
+- Each dependency finding records whether the vulnerable code is reachable. A finding the skill can't confirm stays in To do. It is never ignored on a guess.
+- Secrets: the skill reads a token's role and expiry offline when it can, never sends a secret anywhere without your approval, and ranks live secrets higher. Placeholder and test values are labelled and ranked lower, not dropped.
+- Optional read-only lockfile checks: unexpected registry hosts, missing or weak integrity hashes, git and tarball dependencies, install scripts, and versions newer than your release-age cooldown.
+- When there are signs of compromise, the report adds a short "was it exploited?" triage: scope and time window, log integrity, ongoing or finished, and whether a probe was really a breach.
+- New self-test for the agent privacy script, and a new eval case for unconfirmed reachability.
+
 ## 1.7.2 (2026-10-24)
 
 - Desktop app versions are read from the app's metadata (`Info.plist` on macOS), never by running the app. Running a desktop app with `--version` starts it, and could crash it with an error dialog.
