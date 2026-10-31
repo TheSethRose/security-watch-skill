@@ -2,6 +2,11 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.9.0 (2026-10-30)
+
+- Every run now checks pwn.watch, a live incident tracker, for software you run. Patch incidents are compared with your installed versions, supply-chain incidents are checked against your lockfiles, and breaches are flagged only for services you use.
+- Incidents that change after the last run (a fix ships, more versions are affected) are re-read, so updates aren't missed.
+
 ## 1.8.0 (2026-10-25)
 
 - Known-compromised package versions are kept in a `known-bad.md` file in your state folder, each with its evidence. Every run checks your lockfiles and global installs against it first, offline. The skill adds entries from supply-chain stories it reads.
