@@ -87,7 +87,8 @@ skills/security-watch/
 │   ├── agent-privacy.md     AI agents sending your details to other sites
 │   └── updates.md           checking for and installing skill updates
 ├── scripts/
-│   └── agent_privacy.py     transcript scan and PreToolUse guard (Python stdlib)
+│   ├── agent_privacy.py     transcript scan and PreToolUse guard (Python stdlib)
+│   └── agent_secrets.py     finds secrets saved in agent settings, never prints them
 └── evals/                   test cases (claude plugin eval)
 ```
 

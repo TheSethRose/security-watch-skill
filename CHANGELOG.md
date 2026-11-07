@@ -2,6 +2,11 @@
 
 The skill's version is `metadata.version` in `skills/security-watch/SKILL.md`. The skill reads this file to tell you what changed when an update is available.
 
+## 1.10.0 (2026-11-07)
+
+- Every run now checks your AI agents' settings files for saved secrets. Some agents save an approved command word for word, so a password you typed can end up in a file such as `.claude/settings.local.json`. A new script finds these, including ones already deleted but still in git history. It shows only the file, the kind of secret and a count, never the value.
+- Committed secrets are treated as exposed, so the next step is to rotate them. Ones that never left your machine rank lower.
+
 ## 1.9.0 (2026-10-30)
 
 - Every run now checks pwn.watch, a live incident tracker, for software you run. Patch incidents are compared with your installed versions, supply-chain incidents are checked against your lockfiles, and breaches are flagged only for services you use.

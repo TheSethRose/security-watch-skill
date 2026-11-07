@@ -2,7 +2,7 @@
 
 ## Project overview
 
-- An agent skill, not an app. Everything that ships lives in `skills/security-watch/`: `SKILL.md` (workflow), `references/` (loaded on demand), `scripts/agent_privacy.py` (Python stdlib only) and `evals/`.
+- An agent skill, not an app. Everything that ships lives in `skills/security-watch/`: `SKILL.md` (workflow), `references/` (loaded on demand), `scripts/` (`agent_privacy.py`, `agent_secrets.py`, Python stdlib only) and `evals/`.
 - Users install it with `npx skills add` or a git clone. Every commit to `main` under `skills/` reaches them.
 
 ## Releases
@@ -21,8 +21,8 @@ Changes outside `skills/` (README, AGENTS.md, LICENSE) need no version bump.
 
 - Evals: `claude plugin eval skills/security-watch`. Cases are `evals/<case>/case.yaml` or `prompt.md` with `graders/*.md`, and an optional `place-files.sh` scaffold. Results land in `evals/results/`, which is gitignored.
 - Add or update an eval case when changing behavior that a case covers.
-- Script: `python3 skills/security-watch/scripts/agent_privacy.py --help`. Keep it stdlib-only.
-- Script self-test (offline, made-up fixtures): `python3 -I skills/security-watch/scripts/test_agent_privacy.py`. Update it when the detector changes.
+- Scripts: `python3 skills/security-watch/scripts/agent_privacy.py --help` and `agent_secrets.py --help`. Keep them stdlib-only.
+- Script self-tests (offline, made-up fixtures): `python3 -I skills/security-watch/scripts/test_agent_privacy.py` and `test_agent_secrets.py`. Update them when a detector changes.
 
 ## Writing style
 

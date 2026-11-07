@@ -186,6 +186,11 @@ What the user has to patch depends on who runs what.
 
 - Agents run code with the user's permissions, so their CLIs, editor extensions and MCP servers are checked like any other app: versions against advisories.
 - Agents can also send the user's own details to other sites, for example a contact email in a User-Agent or their name in a search. Scan their transcripts with `scripts/agent_privacy.py scan`, and remediate with the user. Both are in [agent-privacy.md](agent-privacy.md).
+- Agents can save an approved command word for word, password included, in a settings file inside the project, such as `.claude/settings.local.json`. Check for this with `python3 -I scripts/agent_secrets.py scan --path <folder>` on each folder that holds projects, plus the home folder's agent settings. Use the script instead of opening these files, because a value you read lands in your own transcript. It prints paths, kinds and counts, never values, and it also reads git history. Treat each hit as in Secrets and credentials:
+  - Tracked, or in history on a pushed branch: the secret is exposed, even if the file is gone. It stays in old commits and forks, so the fix is rotation first, then cleanup.
+  - Local only: lower risk, because any local program can read it but it never left the machine. Next step: delete the rule.
+  - Before ranking a hit, work out what the secret opens. Compare it with the project's own files in a script that prints file names only, never the value or its length. A value shared with a local dev database ranks lower than one that opens a public server.
+  - The script misses passwords in unusual forms. Say so under Checked, and word a clean result as "nothing known found".
 
 ## Deployed vs fixed
 
